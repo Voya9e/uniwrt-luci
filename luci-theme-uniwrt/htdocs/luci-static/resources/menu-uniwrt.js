@@ -225,6 +225,13 @@ return baseclass.extend({
 						ev.preventDefault();
 						var isOpen = subEl.classList.toggle('open');
 						navItem.classList.toggle('open', isOpen);
+						if (isOpen && !expandAll) {
+							group.querySelectorAll('.u-nav-sub.open').forEach(function(panel) {
+								if (panel === subEl) return;
+								panel.classList.remove('open');
+								panel.previousElementSibling.classList.remove('open');
+							});
+						}
 					});
 				})(item, sub);
 			}

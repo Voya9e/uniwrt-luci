@@ -356,8 +356,8 @@ msgstr "服务器 / NAS"
 msgid "Show CPU, memory, throughput and uptime chips in the header. Disable to reduce polling on low-end devices."
 msgstr "在顶部显示 CPU、内存、吞吐量和运行时间。关闭可减少低性能设备上的轮询。"
 
-msgid "Show every section of the side menu opened up, instead of only the section of the current page. Sections can still be folded by clicking them."
-msgstr "展开侧边菜单中的所有分组，而不只展开当前页面所属的分组。点击分组仍可将其折叠。"
+msgid "Start with all sections open and toggle each one independently. When disabled, opening a section closes the previous one."
+msgstr "默认展开所有菜单分组，可单独展开或收起每一组。关闭此选项后，展开新分组会自动收起上一个分组。"
 
 msgid "Show moving lines where traffic flows. Runs in your browser only; it does not affect the router."
 msgstr "用流动线条显示流量方向。仅在浏览器中运行，不会影响路由器。"
