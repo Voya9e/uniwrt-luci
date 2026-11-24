@@ -335,6 +335,9 @@ do_install() {
 	# theme was picked since — unless --keep-theme asks to leave LuCI as it is.
 	# (Package upgrades, which run without anyone asking, keep the choice.)
 	uci -q set luci.themes.UniWRT=/luci-static/uniwrt
+	# The standalone archive includes UniWRT's zh-cn catalog; expose the locale
+	# in LuCI's language selector just as the packaged translation does.
+	uci -q set luci.languages.zh_cn='简体中文 (Chinese Simplified)'
 	prev_theme="$(uci -q get luci.main.mediaurlbase 2>/dev/null || true)"
 	switched=0
 	if [ "$KEEPTHEME" != 1 ] && [ "$prev_theme" != /luci-static/uniwrt ]; then

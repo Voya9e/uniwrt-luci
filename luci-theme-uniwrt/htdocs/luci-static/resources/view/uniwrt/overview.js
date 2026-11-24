@@ -355,7 +355,7 @@ return view.extend({
 			$('u-ov-cpu').textContent = pct.toFixed(0) + '%';
 			var meter = $('u-ov-cpu-meter');
 			if (meter) { meter.className = 'u-meter ' + level(pct); setMeter(meter, pct); }
-			$('u-ov-cpu-sub').textContent = _('Load average') + ': ' + load1.toFixed(2) + ' (' + cores + (cores === 1 ? ' core)' : ' cores)');
+			$('u-ov-cpu-sub').textContent = _('Load average') + ': ' + load1.toFixed(2) + ' (' + cores + ' ' + (cores === 1 ? _('core') : _('cores')) + ')';
 		}
 		if (info.memory && info.memory.total && $('u-ov-ram')) {
 			var total = info.memory.total, avail = info.memory.available || info.memory.free, used = total - avail;
@@ -610,7 +610,7 @@ return view.extend({
 				/* netifd reports 'up' per radio, not per network: a network is up
 				   when its radio is and it got an interface */
 				var up = ('up' in i) ? !!i.up : (!!radio.up && !!i.ifname && !radio.disabled && cfg.disabled != '1' && cfg.disabled !== true);
-				var meta = (iw.channel ? ('ch ' + iw.channel) : '') + (iw.signal ? ('  ' + iw.signal + ' dBm') : '');
+				var meta = (iw.channel ? (_('Channel %s').format(iw.channel)) : '') + (iw.signal ? ('  ' + iw.signal + ' dBm') : '');
 				rows.push(E('div', { 'class': 'u-kv' }, [
 					E('span', { 'class': 'k' }, [ E('span', { 'class': 'u-dot ' + (up ? 'up' : 'down') }), ssid ]),
 					E('span', { 'class': 'v' }, [ meta || dev ])

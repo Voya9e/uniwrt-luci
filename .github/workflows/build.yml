@@ -102,7 +102,7 @@ jobs:
         env:
           ARCH: ${{ matrix.arch }}
           FEEDNAME: ${{ env.FEEDNAME }}
-          PACKAGES: ${{ env.PACKAGE }}
+          PACKAGES: ${{ env.PACKAGE }} luci-i18n-uniwrt-zh-cn
           THEME_RELEASE: ${{ env.THEME_RELEASE }}
           V: s
 
@@ -111,11 +111,11 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p dist
-          find "$GITHUB_WORKSPACE/bin" -type f -name "${PACKAGE}*.${{ matrix.extension }}" -print -exec cp -v {} dist/ \;
+          find "$GITHUB_WORKSPACE/bin" -type f \( -name "${PACKAGE}*.${{ matrix.extension }}" -o -name "luci-i18n-uniwrt-zh-cn*.${{ matrix.extension }}" \) -print -exec cp -v {} dist/ \;
           echo "Built package list:"
           find dist -maxdepth 1 -type f -printf '%f\n' | sort
-          test "$(find dist -maxdepth 1 -type f -name "*.${{ matrix.extension }}" | wc -l)" -ge 1 || {
-            echo "::error::No ${PACKAGE} .${{ matrix.extension }} package was produced for OpenWrt ${{ matrix.release }}"
+          test "$(find dist -maxdepth 1 -type f -name "*.${{ matrix.extension }}" | wc -l)" -ge 2 || {
+            echo "::error::Theme and Simplified Chinese translation packages were not both produced for OpenWrt ${{ matrix.release }}"
             exit 1
           }
 
@@ -124,8 +124,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          ipk="$(find dist -maxdepth 1 -name "${PACKAGE}_*.ipk" | head -n1)"
-          sh scripts/make-standalone.sh "$ipk" dist/luci-theme-uniwrt-standalone.tar.gz
+          theme_ipk="$(find dist -maxdepth 1 -name "${PACKAGE}_*.ipk" | head -n1)"
+          i18n_ipk="$(find dist -maxdepth 1 -name "luci-i18n-uniwrt-zh-cn_*.ipk" | head -n1)"
+          sh scripts/make-standalone.sh "$theme_ipk" dist/luci-theme-uniwrt-standalone.tar.gz "$i18n_ipk"
           tar -tzvf dist/luci-theme-uniwrt-standalone.tar.gz
 
       - name: Upload package artifact
