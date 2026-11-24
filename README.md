@@ -8,14 +8,14 @@
 
 Icon sidebar · live dashboard · network map · light, dark and auto modes · one small package, zero external requests.
 
-[![Build](https://github.com/ox1d3x3/uniwrt-luci/actions/workflows/build.yml/badge.svg)](https://github.com/ox1d3x3/uniwrt-luci/actions/workflows/build.yml)
-[![Release](https://img.shields.io/github/v/release/ox1d3x3/uniwrt-luci?color=006fff)](https://github.com/ox1d3x3/uniwrt-luci/releases/latest)
-[![Downloads](https://img.shields.io/github/downloads/ox1d3x3/uniwrt-luci/total?color=006fff&label=downloads)](https://github.com/ox1d3x3/uniwrt-luci/releases)
+[![Build](https://github.com/Voya9e/uniwrt-luci/actions/workflows/build.yml/badge.svg)](https://github.com/Voya9e/uniwrt-luci/actions/workflows/build.yml)
+[![Release](https://img.shields.io/github/v/release/Voya9e/uniwrt-luci?color=006fff)](https://github.com/Voya9e/uniwrt-luci/releases/latest)
+[![Downloads](https://img.shields.io/github/downloads/Voya9e/uniwrt-luci/total?color=006fff&label=downloads)](https://github.com/Voya9e/uniwrt-luci/releases)
 [![Stars](https://img.shields.io/github/stars/ox1d3x3/uniwrt-luci?color=006fff)](https://github.com/ox1d3x3/uniwrt-luci/stargazers)
 [![License](https://img.shields.io/github/license/ox1d3x3/uniwrt-luci?color=blue)](./LICENSE)
 ![OpenWrt](https://img.shields.io/badge/OpenWrt-23.05%20%7C%2024.10%20%7C%2025.12-orange)
 
-[Screenshots](#screenshots) · [Install](#installation) · [Configure](#configuration) · [FAQ](#faq) · [Build](#building-from-source) · [Releases](https://github.com/ox1d3x3/uniwrt-luci/releases/latest)
+[Screenshots](#screenshots) · [Install](#installation) · [Configure](#configuration) · [FAQ](#faq) · [Build](#building-from-source) · [Releases](https://github.com/Voya9e/uniwrt-luci/releases/latest)
 
 <br>
 
@@ -28,7 +28,7 @@ Icon sidebar · live dashboard · network map · light, dark and auto modes · o
 Run on your router over SSH — installs or updates to the latest release ([standalone](#standalone-install-recommended), so firmware upgrades keep working):
 
 ```sh
-wget -T 20 -O /tmp/uniwrt-apply.sh https://github.com/ox1d3x3/uniwrt-luci/releases/latest/download/uniwrt-apply.sh && sh /tmp/uniwrt-apply.sh
+wget -T 20 -O /tmp/uniwrt-apply.sh https://github.com/Voya9e/uniwrt-luci/releases/latest/download/uniwrt-apply.sh && sh /tmp/uniwrt-apply.sh
 ```
 
 ---
@@ -130,7 +130,7 @@ There are two ways to install UniWRT. Both install exactly the same files — th
 Paste this one line into an SSH session on the router. Works on OpenWrt 23.05, 24.10 and 25.12:
 
 ```sh
-wget -T 20 -O /tmp/uniwrt-apply.sh https://github.com/ox1d3x3/uniwrt-luci/releases/latest/download/uniwrt-apply.sh && sh /tmp/uniwrt-apply.sh
+wget -T 20 -O /tmp/uniwrt-apply.sh https://github.com/Voya9e/uniwrt-luci/releases/latest/download/uniwrt-apply.sh && sh /tmp/uniwrt-apply.sh
 ```
 
 It fetches the installer from the latest release, which then downloads the theme, verifies it against the release's `SHA256SUMS`, installs it and activates it. Run the same line again any time to update to the newest release. If UniWRT is already installed as a package, it switches it over to a standalone install and keeps your settings.
@@ -155,7 +155,7 @@ The standalone install copies the theme's files into place without registering a
 
 ### Package install
 
-Download the package for your OpenWrt release from the [latest release](https://github.com/ox1d3x3/uniwrt-luci/releases/latest), copy it to the router (for example to `/tmp`), then install it:
+Download the package for your OpenWrt release from the [latest release](https://github.com/Voya9e/uniwrt-luci/releases/latest), copy it to the router (for example to `/tmp`), then install it:
 
 | OpenWrt | Package manager | File |
 |---|---|---|
@@ -173,9 +173,9 @@ opkg install /tmp/luci-theme-uniwrt_*_all.ipk /tmp/luci-i18n-uniwrt-zh-cn_*.ipk
 
 Not sure which you have? Run `command -v apk` on the router — if it prints a path, use the `.apk`. `--allow-untrusted` is needed because the package comes from GitHub rather than a signed OpenWrt feed.
 
-UniWRT follows LuCI's selected language. The recommended standalone archive includes the Simplified Chinese translation. When installing the theme as a package, install the matching `luci-i18n-uniwrt-zh-cn` package from the same release as well. Then choose **简体中文** under *System → System → Language and Style*.
+UniWRT follows LuCI's selected language. The recommended standalone archive includes the Simplified Chinese translation. When installing the theme as a package, install the matching `luci-i18n-uniwrt-zh-cn` package from the same release as well. For an IPK, choose the language package whose filename includes your OpenWrt release. Then choose **简体中文** under *System → System → Language and Style*.
 
-To uninstall: `apk del luci-theme-uniwrt` (25.12+) or `opkg remove luci-theme-uniwrt` (23.05 / 24.10).
+To uninstall both packages, run `apk del luci-i18n-uniwrt-zh-cn luci-theme-uniwrt` (25.12+) or `opkg remove luci-i18n-uniwrt-zh-cn luci-theme-uniwrt` (23.05 / 24.10). If only the theme is installed, omit the language package name.
 
 ### Selecting the theme
 
@@ -235,7 +235,7 @@ This happens when UniWRT is installed as a **package**. Attended Sysupgrade asks
 **Fix it for good:** switch to the [standalone install](#standalone-install-recommended). It keeps your settings, removes the package, and from then on upgrades work from both the LuCI page and `owut`, with the theme carried into the new firmware:
 
 ```sh
-wget -T 20 -O /tmp/uniwrt-apply.sh https://github.com/ox1d3x3/uniwrt-luci/releases/latest/download/uniwrt-apply.sh && sh /tmp/uniwrt-apply.sh
+wget -T 20 -O /tmp/uniwrt-apply.sh https://github.com/Voya9e/uniwrt-luci/releases/latest/download/uniwrt-apply.sh && sh /tmp/uniwrt-apply.sh
 ```
 
 **Or, to keep the package,** leave it out of each upgrade and reinstall it afterwards:
@@ -271,7 +271,7 @@ A standalone install is only carried over when *Keep settings* is enabled during
 
 The router can't reach GitHub. The installer retries three times, then tells you the reason it got. Check that the router itself has working internet and DNS (`ping -c 3 github.com`), that its clock is right (`date`), and, if it runs a VPN such as Tailscale or WireGuard, that it isn't sending traffic through an exit node or tunnel that's down. A brief GitHub hiccup usually clears if you try again a minute later.
 
-To install without the router downloading anything, download `uniwrt-apply.sh` and `luci-theme-uniwrt-standalone.tar.gz` from the [latest release](https://github.com/ox1d3x3/uniwrt-luci/releases/latest) on a PC, copy both to the router's `/tmp`, and run:
+To install without the router downloading anything, download `uniwrt-apply.sh` and `luci-theme-uniwrt-standalone.tar.gz` from the [latest release](https://github.com/Voya9e/uniwrt-luci/releases/latest) on a PC, copy both to the router's `/tmp`, and run:
 
 ```sh
 sh /tmp/uniwrt-apply.sh --file /tmp/luci-theme-uniwrt-standalone.tar.gz
@@ -320,7 +320,7 @@ Third-party LuCI apps generally work without changes, since UniWRT styles the st
 
 ## Building from source
 
-Every push to `main` runs a static QA gate, builds packages for all supported releases with the OpenWrt SDK, cuts the standalone archive from the 24.10 `.ipk`, tests `uniwrt-apply.sh` against it with the router's own tools, and refreshes the rolling [`nightly`](https://github.com/ox1d3x3/uniwrt-luci/releases/tag/nightly) pre-release.
+Every push to `main` runs a static QA gate, builds packages for all supported releases with the OpenWrt SDK, cuts the standalone archive from the 24.10 `.ipk`, tests `uniwrt-apply.sh` against it with the router's own tools, and refreshes the rolling [`nightly`](https://github.com/Voya9e/uniwrt-luci/releases/tag/nightly) pre-release.
 
 **Releasing** is automatic: bump the version in [`luci-theme-uniwrt/ucode/template/themes/uniwrt/version`](luci-theme-uniwrt/ucode/template/themes/uniwrt/version) and push to `main`. When CI sees a version that has no `v<version>` tag yet, it tags the commit, publishes the release with all packages, checksums and generated notes, and marks it **Latest**. Pushing a `v*` tag by hand still works too.
 
@@ -382,7 +382,7 @@ Please don’t report security problems in public issues. Use [private vulnerabi
 
 ## Changelog
 
-Release notes for every version are on the [Releases](https://github.com/ox1d3x3/uniwrt-luci/releases) page.
+Release notes for every version are on the [Releases](https://github.com/Voya9e/uniwrt-luci/releases) page.
 
 ---
 

@@ -229,7 +229,7 @@ apk_stub() { # $1 = behaviour of 'apk del': ok | fail
 #!/bin/sh
 echo "apk \$*" >> "\$UNIWRT_ROOT/apk.log"
 case "\$1" in
-  info) [ -f "\$UNIWRT_ROOT/pkg-installed" ] ;;
+  info) [ "\$3" = luci-theme-uniwrt ] && [ -f "\$UNIWRT_ROOT/pkg-installed" ] ;;
   del)  [ "$1" = fail ] && { echo "ERROR: unable to select packages:" >&2; echo "  luci-theme-aurora (no such package)" >&2; exit 1; }
         # like the real removal: files go, postrm unregisters the theme
         rm -f "\$UNIWRT_ROOT/pkg-installed" "\$UNIWRT_ROOT/etc/config/uniwrt"
@@ -311,20 +311,21 @@ rm -f "$BB/apk"
 SECTION="12d. migrating from the package install (opkg, OpenWrt 23.05 / 24.10)"; echo "== 12d. migrating from the package install (opkg, OpenWrt 23.05 / 24.10) =="
 pkg_root 16; rm -f "$UNIWRT_ROOT/pkg-installed"
 mkdir -p "$UNIWRT_ROOT/usr/lib/opkg"
-printf 'Package: luci-base\nStatus: install user installed\n\nPackage: luci-theme-uniwrt\nVersion: 2.0.39-r1\nStatus: install user installed\n\n' > "$UNIWRT_ROOT/usr/lib/opkg/status"
+printf 'Package: luci-base\nStatus: install user installed\n\nPackage: luci-theme-uniwrt\nVersion: 2.0.39-r1\nStatus: install user installed\n\nPackage: luci-i18n-uniwrt-zh-cn\nDepends: luci-theme-uniwrt\nStatus: install user installed\n\n' > "$UNIWRT_ROOT/usr/lib/opkg/status"
 rm -f "$BB/opkg"
 cat > "$BB/opkg" <<OPKG
 #!/bin/sh
 echo "opkg \$*" >> "\$UNIWRT_ROOT/opkg.log"
 case "\$1" in
   status) grep -A2 "^Package: \$2\$" "\$UNIWRT_ROOT/usr/lib/opkg/status" ;;
-  remove) awk -v p="\$2" 'BEGIN{RS="";ORS="\n\n"} \$2!=p' "\$UNIWRT_ROOT/usr/lib/opkg/status" > "\$UNIWRT_ROOT/s.n" && mv "\$UNIWRT_ROOT/s.n" "\$UNIWRT_ROOT/usr/lib/opkg/status"
+  remove) [ "\$2" = luci-i18n-uniwrt-zh-cn ] && [ "\$3" = luci-theme-uniwrt ] || exit 1
+          awk -v p="\$2" -v q="\$3" 'BEGIN{RS="";ORS="\n\n"} \$2!=p && \$2!=q' "\$UNIWRT_ROOT/usr/lib/opkg/status" > "\$UNIWRT_ROOT/s.n" && mv "\$UNIWRT_ROOT/s.n" "\$UNIWRT_ROOT/usr/lib/opkg/status"
           rm -rf "\$UNIWRT_ROOT/www/luci-static/uniwrt" "\$UNIWRT_ROOT/etc/config/uniwrt" ;;
 esac
 OPKG
 chmod +x "$BB/opkg"
 check "switch to standalone succeeds" run --file "$ARCHIVE"
-check "opkg remove was called" grep -q "opkg remove luci-theme-uniwrt" "$UNIWRT_ROOT/opkg.log"
+check "opkg remove was called" grep -qx "opkg remove luci-i18n-uniwrt-zh-cn luci-theme-uniwrt" "$UNIWRT_ROOT/opkg.log"
 check "package gone from opkg status, others untouched" bash -c "! grep -q 'Package: luci-theme-uniwrt' '$UNIWRT_ROOT/usr/lib/opkg/status' && grep -q 'Package: luci-base' '$UNIWRT_ROOT/usr/lib/opkg/status'"
 check "settings carried over" grep -q "mode 'dark'" "$UNIWRT_ROOT/etc/config/uniwrt"
 check "all theme files present" all_present
@@ -337,7 +338,10 @@ new_root 17; mkdir -p "$UNIWRT_ROOT/etc/apk"
 "$APK_BIN" mkpkg --info name:luci-base --info version:1-r1 --info arch:noarch --info description:stub --output "$T/luci-base.apk" >/dev/null
 # CI runners are not root: apk needs --usermode to create a database there
 usermode=""; [ "$(id -u)" = 0 ] || usermode="--usermode"
-"$APK_BIN" --root "$UNIWRT_ROOT" --initdb $usermode --allow-untrusted --no-network add --no-scripts "$T/libc.apk" "$T/luci-base.apk" "$PKG_APK" > "$T/out" 2>&1
+"$APK_BIN" --root "$UNIWRT_ROOT" --initdb $usermode --allow-untrusted --no-network add --no-scripts "$T/libc.apk" "$T/luci-base.apk" "$PKG_APK" ${LANG_APK:+"$LANG_APK"} > "$T/out" 2>&1
+if [ -n "${LANG_APK:-}" ]; then
+	check "real apk installed the language package" grep -qx 'P:luci-i18n-uniwrt-zh-cn' "$UNIWRT_ROOT/lib/apk/db/installed"
+fi
 check "real apk installed the 25.12 package (test precondition)" grep -qx "P:luci-theme-uniwrt" "$UNIWRT_ROOT/lib/apk/db/installed"
 uci_ set luci.themes.UniWRT=/luci-static/uniwrt; uci_ set luci.main.mediaurlbase=/luci-static/uniwrt; uci_ commit luci
 echo "	option accent '#38cc65'" >> "$UNIWRT_ROOT/etc/config/uniwrt"

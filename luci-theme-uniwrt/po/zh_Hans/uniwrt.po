@@ -143,9 +143,6 @@ msgstr "磁盘（根分区）"
 msgid "Dismiss"
 msgstr "关闭"
 
-msgid "Down"
-msgstr "下载"
-
 msgid "Download"
 msgstr "下载"
 
@@ -221,9 +218,6 @@ msgstr "笔记本电脑"
 msgid "Large (16px)"
 msgstr "大（16px）"
 
-msgid "Last"
-msgstr "最近"
-
 msgid "Last 24 h"
 msgstr "最近 24 小时"
 
@@ -265,9 +259,6 @@ msgstr "MAC 地址"
 
 msgid "Main router"
 msgstr "主路由器"
-
-msgid "Measured over the last"
-msgstr "统计时段：最近"
 
 msgid "Measuring…"
 msgstr "正在测量…"
@@ -455,9 +446,6 @@ msgstr "UniWRT 概览页面"
 msgid "UniWRT Theme"
 msgstr "UniWRT 主题"
 
-msgid "Up"
-msgstr "上传"
-
 msgid "Upgrade all"
 msgstr "全部升级"
 
@@ -524,17 +512,11 @@ msgstr "设备指纹"
 msgid "device name “%s”"
 msgstr "设备名称“%s”"
 
-msgid "down"
-msgstr "下行"
-
 msgid "hardware maker"
 msgstr "硬件制造商"
 
 msgid "idle"
 msgstr "空闲"
-
-msgid "more"
-msgstr "更多"
 
 msgid "no link"
 msgstr "未连接"
@@ -551,12 +533,6 @@ msgstr "私有地址"
 msgid "shown per port for wired devices"
 msgstr "有线设备按端口显示"
 
-msgid "total"
-msgstr "总计"
-
-msgid "up"
-msgstr "上行"
-
 msgid "uplink to main router"
 msgstr "上联至主路由器"
 
@@ -570,3 +546,50 @@ msgid "%d device"
 msgid_plural "%d devices"
 msgstr[0] "%d 台设备"
 
+msgid "\"Auto\" follows your operating system's light/dark preference. The header toggle can override this per-browser."
+msgstr "“自动”会跟随操作系统的浅色或深色设置。你也可以用页面顶部的按钮单独切换当前浏览器的主题。"
+
+msgid "Connected"
+msgstr "已连接"
+
+msgid "Disconnected"
+msgstr "已断开"
+
+msgid "Last %d h"
+msgstr "最近 %d 小时"
+
+msgid "Measured over the last %s hours"
+msgstr "根据最近 %s 小时的数据统计"
+
+msgid "+%d more · %d total"
+msgstr "另有 %d 台，共 %d 台"
+
+msgid "%dd"
+msgstr "%d天"
+
+msgid "%dh"
+msgstr "%d小时"
+
+msgid "%dm"
+msgstr "%d分钟"
+
+msgid "%dd %dh"
+msgstr "%d天 %d小时"
+
+msgid "%dh %dm"
+msgstr "%d小时 %d分钟"
+
+msgid "CPU: %s (load %s, cores: %d)"
+msgstr "CPU：%s（负载 %s，%d 核）"
+
+msgid "Memory: %s / %s (%s)"
+msgstr "内存：%s / %s（%s）"
+
+msgid "Uptime: %s"
+msgstr "运行时间：%s"
+
+msgid "Throughput"
+msgstr "吞吐量"
+
+msgid "Memory Usage"
+msgstr "内存使用率"
