@@ -62,6 +62,13 @@ return baseclass.extend({
 			if (children[name])
 				children[name] = Object.assign({}, children[name], { title: titles[name] });
 		});
+		var system = children.system;
+		if (system && system.children && system.children.uniwrt) {
+			var settings = Object.assign({}, system.children.uniwrt, { title: 'UniWRT Theme' });
+			children.system = Object.assign({}, system, {
+				children: Object.assign({}, system.children, { uniwrt: settings })
+			});
+		}
 		return Object.assign({}, root, { children: children });
 	},
 

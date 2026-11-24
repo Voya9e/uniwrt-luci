@@ -1,10 +1,9 @@
 {
 	"admin/system/uniwrt": {
-		"title": "UniWRT Theme",
 		"order": 90,
 		"action": {
-			"type": "view",
-			"path": "uniwrt/settings"
+			"type": "template",
+			"path": "themes/uniwrt/settings"
 		},
 		"depends": {
 			"acl": [ "luci-theme-uniwrt" ]
