@@ -11,7 +11,6 @@
 		}
 	},
 	"admin/uniwrt-overview": {
-		"title": "Overview",
 		"order": 5,
 		"action": {
 			"type": "view",
@@ -22,7 +21,6 @@
 		}
 	},
 	"admin/uniwrt-netmap": {
-		"title": "Network Map",
 		"order": 6,
 		"action": {
 			"type": "view",
