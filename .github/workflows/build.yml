@@ -104,6 +104,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          sudo chown "$(id -u):$(id -g)" dist
           theme_ipk="$(find dist -maxdepth 1 -name "${PACKAGE}_*.ipk" | head -n1)"
           i18n_ipk="$(find dist -maxdepth 1 -name "luci-i18n-uniwrt-zh-cn_*.ipk" | head -n1)"
           sh scripts/make-standalone.sh "$theme_ipk" dist/luci-theme-uniwrt-standalone.tar.gz "$i18n_ipk"
