@@ -22,6 +22,13 @@ else
   bad "node/nodejs not found"
 fi
 
+echo "== Sidebar behaviour =="
+if [ -n "$NODE" ] && "$NODE" tests/test-menu.js; then
+  ok "theme-specific navigation and accordion behaviour"
+else
+  bad "sidebar behaviour (see above)"
+fi
+
 echo "== JSON validity =="
 while IFS= read -r f; do
   if python3 -c "import json,sys; json.load(open(sys.argv[1]))" "$f" 2>/tmp/jsonerr; then ok "$f"; else bad "$f"; cat /tmp/jsonerr; fi
@@ -88,6 +95,8 @@ for f in uniwrt-apply.sh scripts/make-standalone.sh "$PKG_DIR"/root/etc/uci-defa
   if $SH -n "$f" 2>/tmp/sherr; then ok "$f"; else bad "$f"; cat /tmp/sherr; fi
 done
 
+if bash -n scripts/build-sdk.sh; then ok "scripts/build-sdk.sh"; else bad "scripts/build-sdk.sh"; fi
+
 echo "== LuCI widget mechanics the theme must provide =="
 CSS="$PKG_DIR/htdocs/luci-static/uniwrt/css/cascade.css"
 need() { # description, fixed string that must appear in cascade.css
@@ -118,6 +127,8 @@ for path, e in menu.items():
     a = e.get('action', {})
     if a.get('type') == 'view' and not (res / 'view' / (a['path'] + '.js')).is_file():
         print('  menu %s -> missing view %s.js' % (path, a['path'])); bad = 1
+    if a.get('type') == 'template' and not (pkg / 'ucode/template' / (a['path'] + '.ut')).is_file():
+        print('  menu %s -> missing template %s.ut' % (path, a['path'])); bad = 1
 acl = json.load(open(pkg / 'root/usr/share/rpcd/acl.d/luci-theme-uniwrt.json'))['luci-theme-uniwrt']
 granted = {(o, m) for part in ('read', 'write') for o, ms in acl.get(part, {}).get('ubus', {}).items() for m in ms}
 base = {('uci', m) for m in ('get', 'changes')} | {('session', 'access')}
