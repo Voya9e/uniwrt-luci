@@ -1,0 +1,181 @@
+name: PR router test release
+env:
+  PACKAGE: luci-theme-uniwrt
+  FEEDNAME: uniwrt
+  THEME_RELEASE: 1000${{ github.run_number }}
+concurrency:
+  group: pr-router-test-${{ github.ref }}
+  cancel-in-progress: false
+permissions:
+  contents: read
+jobs:
+  qa:
+    name: Static QA
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    - name: Install QA dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y nodejs python3-yaml
+    - name: Run static QA
+      run: bash ./qa-static.sh
+  build:
+    name: Build ${{ matrix.label }}
+    needs: qa
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+        - release: 23.05.6
+          arch: x86_64-23.05.6
+          extension: ipk
+          label: legacy .ipk for OpenWrt 23.05.x
+        - release: 24.10.6
+          arch: x86_64-24.10.6
+          extension: ipk
+          label: current .ipk for OpenWrt 24.10.x
+          standalone: true
+        - release: 25.12.4
+          arch: x86_64-25.12.4
+          extension: apk
+          label: modern .apk for OpenWrt 25.12.x+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    - name: Build package with OpenWrt SDK
+      env:
+        SDK_RELEASE: ${{ matrix.release }}
+        SDK_IMAGE: ghcr.io/openwrt/sdk:${{ matrix.arch }}
+        EXT: ${{ matrix.extension }}
+      run: |
+        set -euo pipefail
+        mkdir dist
+        sudo chown 1000:1000 dist
+        docker run --rm --entrypoint bash -e PACKAGE -e FEEDNAME -e SDK_RELEASE -e THEME_RELEASE -e EXT \
+          -v "$PWD:/feed:ro" -v "$PWD/dist:/out" "$SDK_IMAGE" /feed/scripts/build-sdk.sh
+    - name: Build standalone archive
+      if: matrix.standalone
+      shell: bash
+      run: |
+        set -euo pipefail
+        sudo chown "$(id -u):$(id -g)" dist
+        theme_ipk="$(find dist -maxdepth 1 -name "${PACKAGE}_*.ipk" | head -n1)"
+        i18n_ipk="$(find dist -maxdepth 1 -name "luci-i18n-uniwrt-zh-cn_*.ipk" | head -n1)"
+        sh scripts/make-standalone.sh "$theme_ipk" dist/luci-theme-uniwrt-standalone.tar.gz "$i18n_ipk"
+        tar -tzvf dist/luci-theme-uniwrt-standalone.tar.gz
+    - name: Upload package artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ env.PACKAGE }}-${{ matrix.release }}-${{ matrix.extension }}
+        path: dist/*
+        if-no-files-found: error
+  test-standalone:
+    name: Test standalone install (OpenWrt BusyBox, uci, apk)
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    - name: Download packages
+      uses: actions/download-artifact@v4
+      with:
+        path: artifacts
+        merge-multiple: true
+    - name: Install build dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y busybox cmake pkg-config libjson-c-dev meson ninja-build libssl-dev zlib1g-dev
+    - name: Build OpenWrt's BusyBox, uci and apk
+      shell: bash
+      run: bash tests/setup-openwrt-tools.sh "$RUNNER_TEMP/owtools" | tail -n1 | tr ' ' '\n' >> "$GITHUB_ENV"
+    - name: Test with the router's tools (incl. real apk migration of the 25.12 package)
+      shell: bash
+      run: |
+        set -euo pipefail
+        for v in BUSYBOX UCI_BIN APK_BIN; do test -x "${!v:-}" || { echo "::error::$v not built"; exit 1; }; done
+        "$BUSYBOX" 2>&1 | head -n1 || true
+        PKG_APK="$(find artifacts -name 'luci-theme-uniwrt-*.apk' | head -n1)"
+        export LANG_APK="$(find artifacts -name 'luci-i18n-uniwrt-zh-cn-*.apk' | head -n1)"
+        test -n "$LANG_APK" && test -n "$PKG_APK"
+        PKG_APK="$PKG_APK" bash tests/test-apply.sh artifacts/luci-theme-uniwrt-standalone.tar.gz
+    - name: Test with stock BusyBox and the uci stub
+      run: env -u BUSYBOX -u BUSYBOX_LINKS -u UCI_BIN -u APK_BIN bash tests/test-apply.sh artifacts/luci-theme-uniwrt-standalone.tar.gz
+  release:
+    name: Publish PR router test prerelease
+    needs:
+    - build
+    - test-standalone
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+    - name: Checkout (for release helper)
+      uses: actions/checkout@v4
+    - name: Download packages
+      uses: actions/download-artifact@v4
+      with:
+        path: artifacts
+        merge-multiple: true
+    - name: Prepare release assets
+      shell: bash
+      run: |
+        set -euo pipefail
+        mkdir -p release
+        find artifacts -type f \( -name '*.ipk' -o -name '*.apk' -o -name '*-standalone.tar.gz' \) -print -exec cp -v {} release/ \;
+        test -f release/luci-theme-uniwrt-standalone.tar.gz || {
+          echo "::error::Standalone archive missing"; exit 1; }
+        cp -v uniwrt-apply.sh release/
+        test "$(find release -type f \( -name '*.ipk' -o -name '*.apk' \) | wc -l)" -eq 6 || {
+          echo "::error::No package assets found"; exit 1; }
+        printf '%s\n' 'PR source: 74838b9556d41d0321c516e2c24ca896c2591c2c' > release/SOURCE.txt
+        ( cd release && sha256sum -- * > SHA256SUMS )
+    - name: Publish prerelease
+      uses: softprops/action-gh-release@v2
+      with:
+        tag_name: pr-router-test-20261126-74838b9
+        target_commitish: 74838b9556d41d0321c516e2c24ca896c2591c2c
+        name: PR router test - 2.0.51 (74838b9)
+        prerelease: true
+        make_latest: false
+        fail_on_unmatched_files: true
+        files: release/*
+        body: |
+          Router test build of `pr/chinese-and-navigation` at commit `74838b9556d41d0321c516e2c24ca896c2591c2c` (theme version 2.0.51).
+
+          The build branch adds only this test-release workflow; application code matches the PR commit. Static QA, SDK builds for OpenWrt 23.05 / 24.10 / 25.12, and installation/migration tests must pass before publication. This is a prerelease for real-router validation, not a report that router tests have passed.
+
+          ### Standalone installation (all three OpenWrt versions)
+          Download `uniwrt-apply.sh`, `luci-theme-uniwrt-standalone.tar.gz`, and `SHA256SUMS` from **this release**, copy them to `/tmp` on the router, then run:
+
+          ```sh
+          cd /tmp
+          # Verify only the two downloaded installation files:
+          grep -E '  (uniwrt-apply.sh|luci-theme-uniwrt-standalone.tar.gz)$' SHA256SUMS > uniwrt-test.SHA256SUMS
+          sha256sum -c uniwrt-test.SHA256SUMS && sh /tmp/uniwrt-apply.sh --file /tmp/luci-theme-uniwrt-standalone.tar.gz
+          ```
+
+          Use `--file` as shown: this installer retains upstream defaults, so running it without `--file` would download the upstream release instead of this test build. The archive includes Simplified Chinese translations. Refresh the browser with Ctrl+Shift+R; choose Simplified Chinese in LuCI Language and Style.
+
+          ### Package installation
+          For OpenWrt 25.12 use the theme `.apk` and `luci-i18n-uniwrt-zh-cn` `.apk` together. For 23.05 / 24.10 choose the corresponding `.ipk` assets (the language package filename includes the SDK release). Standalone installation is recommended if an older package build is already installed.
+
+          ### Router checks
+          - Chinese login, overview, network map, settings and header tooltips.
+          - Single-section accordion and independent expanded sections; Ctrl/Cmd/middle-click links.
+          - Switch to another theme: UniWRT links disappear and its settings URL is unavailable. Switch back: links return.
+          - Keep settings during reinstall; verify Network Map and live status still work.
+'on':
+  push:
+    branches:
+    - build/pr-router-test-74838b9
